@@ -6,4 +6,5 @@
 - [Entity 매핑 관련 어노테이션](https://jeweled-chance-709.notion.site/Entity-dc4c1cef92234cc79eff832c96a1d6be)
 - [Spring Boot JPA](https://jeweled-chance-709.notion.site/Spring-Boot-JPA-eeb5efb8b30444f581c5af5181bcfaa0)
 - [Thymeleaf](https://jeweled-chance-709.notion.site/Thymeleaf-2bf1b2a91d7749b7936e3f6eebd781b8
+- [연관 관계 매핑](https://jeweled-chance-709.notion.site/dae1c0a426b94f4cae797b983c2fcd82?pvs=4)
 )

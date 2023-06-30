@@ -48,7 +48,7 @@ public class Member {
 		member.setAddress(memberFormDto.getAddress());
 		String password = passwordEncoder.encode(memberFormDto.getPassword()); // 스프링 시큐리티 설정 클래스에 등록한 BCryptPasswordEncoder Bean을 파라미터로 넘겨서 비밀번호를 암호화 한다.
 		member.setPassword(password);
-		member.setRole(Role.USER);
+		member.setRole(Role.ADMIN);
 		return member;
 	}
 }
