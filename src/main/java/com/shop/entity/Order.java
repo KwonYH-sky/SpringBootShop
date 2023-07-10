@@ -13,7 +13,7 @@ import java.util.List;
 // 정렬할 때 사용하는 "order" 키워드가 있기 때문에 Order 엔티티에 매핑되는 테이블로 "orders"를 지정한다.
 @Table(name = "orders")
 @Getter @Setter
-public class Order {
+public class Order extends BaseEntity {
 
     @Id
     @GeneratedValue
@@ -43,7 +43,4 @@ public class Order {
                 orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    private LocalDateTime regTime;
-
-    private LocalDateTime updateTime;
 }
