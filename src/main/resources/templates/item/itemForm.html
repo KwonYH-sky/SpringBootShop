@@ -6,6 +6,7 @@
 <th:block layout:fragment="script">
   <script th:inline="javascript">
     $(document).ready(() => {
+      // 상품 등록 실패 메세지를 받아서 상품 등록 페이지에 재진입 시 alert를 통해서 실패 사유를 보여준다.
       let errorMessage = [$(errorMessage)];
       if (errorMessage != null) {
         alert(errorMessage);
@@ -21,6 +22,14 @@
 
         fileExt = fileExt.toLowerCase(); // 소문자 변환
 
+        /**
+         * 파일 첨부 시 이미지 파일인지 검사를 한다.
+         * 보통 데이터를 검증할 때는 스크립트에서 validation을 한 번 하고, 
+         * 스크립트는 사용자가 변경이 가능하므로 서버에서 한번 더 validation을 한다.
+         * 
+         * 스크립트에서 밸리데이션을 하는 이유는 서버쪽으로 요성하면 네트워크를 통해 서버에 요청이 도착하고 
+         * 다시 그 결과를 클라이언트에 반환하는 등 리소스를 소모하기 때문이다.
+         */ 
         if (
           fileExt != "jpg" &&
           fileExt != "jpeg" &&
@@ -32,6 +41,7 @@
           return;
         }
 
+        // label 태그 안의 내용을 jquery의 .html()을 이용해 파일명을 입력해준다.
         $(this).siblings(".custom-file-label").html(fileName);
       });
     }
@@ -56,6 +66,10 @@
 </th:block>
 
 <div layout:fragment="content">
+  <!-- 
+    파일을 전송할 때는 form 태그에 enctype(인코딩 타입) 값으로 'multipart/form-data'를 입력한다.
+    모든 문자를 인코딩하지 않음을 명시한다. 이 속성은 method 속성값이 "post"인 경우에만 사용할 수 있다.
+   -->
   <form role="form" method="post" enctype="multipart/form-data" th:object="${itemFormDto}">
 
     <p class="h2">
@@ -103,29 +117,44 @@
     </div>
     <p th:if="${#fields.hasErrors('itemDetail')}" th:errors="*{itemDetail}" class="fieldError">Incorrect data</p>
 
+    <!-- 상품 이미지 정보를 담고 있는 리스트가 비어 있다면 상품을 등록하는 경우 -->
     <div th:if="${#lists.isEmpty(itemFormDto.itemImgDtoList)}">
+      <!-- 
+        타임리프의 유틸리티 객체 #numbers.sequence(start, end)를 이용하면 start부터 end까지 반복 처리를 할 수 있다.
+        상품 등록 시 이미지의 개수를 최대 5개로 한다. num에는 1부터 5까지 숫자가 할당된다.
+       -->
       <div class="form-group" th:each="num: ${#numbers.sequence(1, 5)}">
         <div class="custom-file img-div">
           <input type="file" class="custom-file-input" name="itemImgFile">
+          <!-- label 태그에는 몇 번째 상품 이미지인지 표시를 한다. -->
           <label class="custom-file-label" th:text="상품이미지 + ${num}"></label>
         </div>
       </div>
     </div>
 
+    <!-- 상품 이미지 정보를 담고 있는 리스트가 비어 있지 않다면 상품을 수정하는 경우 -->
     <div th:if="${not #lists.isEmpty(itemFormDto.itemImgDtoList)}">
       <div class="form-group" th:each="itemImgDto, status: ${itemFormDto.itemImgDtoList}">
         <div class="custom-file img-div">
           <input type="file" class="custom-file-input" name="itemImgFile">
+          <!-- 상품 수정 시 어떤 이미지가 수정됐는지를 알기 위해서 상품 이미지의 아이디를 hidden 값으로 숨겨둔다. -->
           <input type="hidden" name="itemImgIds" th:value="${itemImgDto.id}">
+          <!-- 
+            타임리프의 유틸리티 객체인 #string.isEmpty(string)을 이용하여 
+            저장된 이미지 정보가 있다면 파일의 이름을 보여주고,
+            없다면 '상품 이미지 + 번호'를 출력한다.
+          -->
           <label class="custom-file-label"
             th:text="${not #strings.isEmpty(itemImgDto.oriImgName)} ? ${itemImgDto.oriImgName} : '상품이미지' + ${status.index+1}"></label>
         </div>
       </div>
     </div>
 
+    <!-- 상품 아이디가 없는 경우(상품을 처음 등록할 경우) 저장 로직을 호출하는 버튼을 보여준다. -->
     <div th:if="${#strings.isEmpty(itemFormDto.id)}" style="text-align: center;">
       <button th:formaction="@{/admin/item/new}" type="submit" class="bth bth-primary">저장</button>
     </div>
+    <!-- 상품의 아이디가 있는 경우 수정 로직을 호출하는 버튼을 보여준다. -->
     <div th:unless="${#strings.isEmpty(itemFormDto.id)}" style="text-align: center;">
       <button th:formaction="@{'/admin/item/' + ${itemFormDto.id} }" type="submit" class="bth bth-primary">수정</button>
     </div>
