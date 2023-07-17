@@ -4,10 +4,11 @@
   
 <!--사용자 스크립트 추가-->
 <th:block layout:fragment="script">
+
   <script th:inline="javascript">
     $(document).ready(() => {
       // 상품 등록 실패 메세지를 받아서 상품 등록 페이지에 재진입 시 alert를 통해서 실패 사유를 보여준다.
-      let errorMessage = [$(errorMessage)];
+      let errorMessage = [[${errorMessage}]];
       if (errorMessage != null) {
         alert(errorMessage);
       }
@@ -16,8 +17,8 @@
     });
 
     function bindDomEvent() {
-      $(".custom_file-input").on("change", () => {
-        let fileName = $(this).val().split("\\").pop(); // 이미지 파일명
+      $(".custom-file-input").on("change", e => {
+        let fileName = $(e.currentTarget).val().split("\\").pop(); // 이미지 파일명
         let fileExt = fileName.substring(fileName.lastIndexOf(".") + 1); // 확장자 추출
 
         fileExt = fileExt.toLowerCase(); // 소문자 변환
@@ -42,7 +43,7 @@
         }
 
         // label 태그 안의 내용을 jquery의 .html()을 이용해 파일명을 입력해준다.
-        $(this).siblings(".custom-file-label").html(fileName);
+        $(e.currentTarget).siblings(".custom-file-label").html(fileName);
       });
     }
   </script>
