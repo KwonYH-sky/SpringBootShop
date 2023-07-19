@@ -65,4 +65,22 @@ public class ItemService {
 		return itemFormDto;
 	}
 
+	public Long updateItem(ItemFormDto itemFormDto, List<MultipartFile> itemImgFileList) throws Exception {
+
+		// 상품 수정
+		// 상품 등록 화면으로 부터 전달 받은 상품 아이디를 이용하여 상품 엔티티를 조회
+		Item item = itemRepository.findById(itemFormDto.getId()).orElseThrow(EntityNotFoundException::new); 
+		item.updateItem(itemFormDto); // 상품 등록 화면으로 부터 전달 받은 ItemFormDto를 통해 상품 엔티티를 업데이트
+
+		// 상품 이미지 아이디 리스트를 조회한다.
+		List<Long> itemImgIds = itemFormDto.getItemImgIds();
+
+		// 이미지 등록
+		for(int i = 0; i < itemImgFileList.size(); i++) {
+			// 상품 이미지를 업데이트하기 위해서 updateItemImg() 메소드에 상품 이미지 아이디와 상품 이미지 파일 정보를 파라미터로 전달
+			itemImgService.updateItemImg(itemImgIds.get(i), itemImgFileList.get(i));
+		}
+
+		return item.getId();
+	}
 }
