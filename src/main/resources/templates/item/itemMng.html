@@ -64,36 +64,50 @@
                 <tr th:each="item, status: ${items.getContent()}">
                     <td th:text="${item.id}"></td>
                     <td>
-                        <a href="'/admin/item/' + ${item.id}" th:text="${item.itemNm}"></a>
+                        <a th:href="'/admin/item/' + ${item.id}" th:text="${item.itemNm}"></a>
                     </td>
                     <!-- 현재 상품의 판매 상태가 "SELL"이면 '판매 중'으로, 같지 않으면 '품절'로 보여준다. -->
                     <td th:text="${item.itemSellStatus == T(com.shop.constant.ItemSellStatus).SELL} ? '판매중' : '품절'"></td>
-                    <td th:text="${item.createdBy}"></td>
+                    <td th:text="${item.createBy}"></td>
                     <td th:text="${item.regTime}"></td>
                 </tr>
             </tbody>
         </table>
 
-        <div th:with="start=${(item.number/maxPage)*maxPage + 1}, 
-                    end=(${(items.totalPages == 0) ? 1 : (star + (maxPage - 1) < items.totalPages ? star + (maxPage - 1) : items.totalPages)})">
+        <!-- 
+            th:with는 변수값을 정의할 때 사용한다.
+            페이지 시작 번호(start)와 페이지 끝 페이지 번호(end)를 구해서 저장한다.
+            시작 페이지와 끝 페이지 번호를 구하는 방법을 정리하면 다음과 같다.
+            * start = (현재 페이지 번호/보여줄 페이지수) + 1
+            * end = start + (보여줄 페이지 수 - 1) 
+         -->
+        <div th:with="start=${(items.number/maxPage)*maxPage + 1}, 
+        end=(${(items.totalPages == 0) ? 1 : (start + (maxPage - 1) < items.totalPages ? start + (maxPage - 1) : items.totalPages)})">
 
             <ul class="pagination justify-content-center">
 
-                <li class="page-item" th:classappend="${items.first}?'disable'">
+                <!-- 첫 번째 페이지면 이전 페이지로 이동하는 <Previous> 버튼을 선택 불가능하도록 disabled 클래스를 추가한다. -->
+                <li class="page-item" th:classappend="${items.first}?'disabled'">
+
+                    <!-- <Previous> 버튼 클릭 시 현재 페이지에서 이전 페이지로 이동하도록 page 함수를 호출한다. -->
                     <a th:onclick="'javascript:page(' + ${items.number - 1} + ')'" aria-label='Previous' class="page-link">
-                        <span aria-hidden="true">Previous</span>
+                        <span aria-hidden='true'>Previous</span>
                     </a>
                 </li>
-                <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}" 
-                    th:classappend="${items.number eq page-1}? 'active' : ''">
 
+                <!-- 현재 페이지이면 active 클래스를 추가한다. -->
+                <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}" th:classappend="${items.number eq page-1}?'active':''">
+
+                    <!-- 페이지 번호 클릭 시 해당 페이지로 이동하도록 page 함수를 호출한다. -->
                     <a th:onclick="'javascript:page(' + ${page - 1} + ')'" th:inline="text" class="page-link">[[${page}]]</a>
-
                 </li>
 
-                <li class="page-item" th:classappend="${item.last}?'disable'">
+                <!--마지막 페이지일 경우 다음 페이지로 이동하는 <Next> 버튼을 선택 불가능하도록 disabled 클래스를 추가한다. -->
+                <li class="page-item" th:classappend="${items.last}?'disabled'">
+
+                    <!-- <Next> 버튼 클릭 시 현재 페이지에서 다음 페이지로 이동하도록 page 함수를 호출한다. -->
                     <a th:onclick="'javascript:page(' + ${items.number + 1} + ')'" aria-label='Next' class="page-link">
-                        <span aria-hidden="true">Next</span>
+                        <span aria-hidden='true'>Next</span>
                     </a>
                 </li>
             </ul>
@@ -115,10 +129,10 @@
             </select>
             <select th:field="*{searchBy}" class="form-control" style="width: auto;">
                 <option value="itemNm">상품명</option>
-                <option value="createdBy">등록자</option>
+                <option value="createBy">등록자</option>
             </select>
-            <input th:filed="*{searchQuery}" type="text" class="form-control" placeholder="검색어를 입력해주세요">
-            <button id="searchBth" type="submit" class="bth bth-primary"></button>
+            <input th:field="*{searchQuery}" type="text" class="form-control" placeholder="검색어를 입력해주세요">
+            <button id="searchBtn" type="submit" class="btn btn-primary">검색</button>
         </div>
     </form>
 </div>

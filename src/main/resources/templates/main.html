@@ -3,10 +3,104 @@
       xmlns:layout="http://www.ultreq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout1}">
 
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+  <style>
+    .carousel-inner > .item {
+      height: 350px;
+    }
+    .margin{
+      margin-bottom: 30px;
+    }
+    .banner {
+      height: 300px;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .card-text{
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    a:hover{
+      text-decoration: none;
+    }
+    .center{
+      text-align:center;
+    }
+  </style>
+</th:block>
+
 <div layout:fragment="content">
 
-  <h1>메인 페이지입니다.</h1>
+  <!-- 
+    부트스트랩의 슬라이드를 보여주는 Carousel 컴포넌트를 이용하여 배너를 만들었다.
+    쇼핑몰의 경우 보통 현재 행사 중인 상품을 광고하는 데 사용한다.
+   -->
+  <div id="carouselControls" class="carousel slide margin" data-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active item">
+        <img class="d-block w-100 banner" src="https://user-images.githubusercontent.com/13268420/112147492-1ab76200-8c20-11eb-8649-3d2f282c3c02.png" alt="First slide">
+      </div>
+    </div>
+  </div>
 
+  <!-- 
+    쇼핑몰 오른쪽 상당의 Search 기능을 이용해서 
+    상품을 검색할 때 페이징 처리 시 해당 검색어를 유지하기 위해서 hidden 값으로 검색어를 유지
+   -->
+  <input type="hidden" name="searchQuery" th:value="${itemSearchDto.searchQuery}">
+  <div th:if="${not #strings.isEmpty(itemSearchDto.searchQuery)}" class="center">
+    <!-- 상품을 검색했을 때 어떤 검색어로 조회된 결과인지 보여준다. -->
+    <p class="h3 font-weight-bold" th:text="${itemSearchDto.searchQuery} + '검색결과'"></p>
+  </div>
+
+  <div class="row">
+    <!-- 
+      조회한 메인 상품 데이터를 보여준다.
+      부트스트랩의 Card 컴포넌트를 이용했고,
+      사용자가 카드 형태로 상품의 이름, 내용, 가격을 볼 수 있다.
+     -->
+    <th:block th:each="item, status: ${items.getContent()}">
+      <div class="col-md-4 margin">
+        <div class="card">
+          <a th:href="'/item/' + ${item.id}" class="text-dark">
+            <img th:src="${item.imgUrl}" th:alt="${item.itemNm}" class="card-img-top" height="400">
+            <div class="card-body">
+              <h4 class="card-title">[[${item.itemNm}]]</h4>
+              <p class="card-text">[[${item.itemDetail}]]</p>
+              <h3 class="card-title text-danger">[[${item.price}]]원</h3>
+            </div>
+          </a>
+        </div>
+      </div>
+    </th:block>
+  </div>
+
+  <div th:with="start=${(items.number/maxPage)*maxPage + 1}, 
+    end=(${(items.totalPages == 0) ? 1 : (start + (maxPage + 1) < items.totalPages ? start + (maxPage - 1) : items.totalPages)})">
+
+    <ul class="pagination justify-content-center">
+
+      <li class="page-item" th:classappend="${items.number eq 0}?'disabled':''">
+        <a th:href="@{'/' + '?searchQuery=' + ${itemSearchDto.searchQuery} + '&page' + ${items.number-1}}" aria-label='Previous' class="page-link">
+          <span aria-hidden="true">Previous</span>
+        </a>
+      </li>
+
+      <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}" th:classappend="${items.number eq page-1}?'action':''">
+        <a th:href="@{'/' + '?searchQuery=' + ${itemSearchDto.searchQuery} + '&page' + ${page-1}}" th:inline="text" class="page-link">[[${page}]]</a>
+      </li>
+
+      <li class="page-item" th:classappend="${items.number+1 ge items.totalPages}?'disabled':''">
+        <a th:href="@{'/' + '?searchQuery=' + ${itemSearchDto.searchQuery} + '&page' + ${items.number+1}}" aria-label='Next' class="page-link">
+          <span aria-hidden="true">Next</span>
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
 
 </html>

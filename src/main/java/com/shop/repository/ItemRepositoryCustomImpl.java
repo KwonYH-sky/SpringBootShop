@@ -5,8 +5,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shop.constant.ItemSellStatus;
 import com.shop.dto.ItemSearchDto;
+import com.shop.dto.MainItemDto;
+import com.shop.dto.QMainItemDto;
 import com.shop.entity.Item;
 import com.shop.entity.QItem;
+import com.shop.entity.QItemImg;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -72,6 +75,13 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom { // ItemR
 	}
 
 	/**
+	 * 검색어가 null이 아니면 상품명에 해당 검색어가 포함되는 상품을 조회하는 조건을 반환
+	 */
+	private BooleanExpression itemNmLike(String searchQuery) { 
+		return StringUtils.isEmpty(searchQuery) ? null : QItem.item.itemNm.like("%" + searchQuery + "%");
+	}
+
+	/**
 	 * queryFactory를 이용해서 쿼리를 생성한다.
 	 * 쿼리문을 직접 작성할 때의 형태와 문법이 비슷한 것을 볼 수 있다.
 		 * selectFrom(QItem.item): 상품 데이터를 조회하기 위해서 {@link QItem}의 item을 지정한다.
@@ -97,5 +107,33 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom { // ItemR
 		List<Item> content = results.getResults();
 		long total = results.getTotal();
 		return new PageImpl<>(content, pageable, total); // 조회한 데이터를 Page 클래스의 구현체인 PageImpl 객체로 반환한다.
+	}
+
+	@Override
+	public Page<MainItemDto> getMainItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
+		QItem item = QItem.item;
+		QItemImg itemImg = QItemImg.itemImg;
+
+		QueryResults<MainItemDto> results = queryFactory
+				.select(
+						new QMainItemDto( // QMainItemDto의 생성자에 반환할 값들을 넣어준다.
+								item.id,  // @QueryProjection을 사용하면 DTO로 바로 조회가 가능하다.
+								item.itemNm, // 엔티티 조회 후 DTO로 반환하는 과정을 줄일 수 있다.
+								item.itemDetail,
+								itemImg.imgUrl,
+								item.price)
+				)
+				.from(itemImg)
+				.join(itemImg.item, item) // itemImg와 item을 내부 조인한다.
+				.where(itemImg.repimgYn.eq("Y")) // 상품 이미지의 경우 대표 상품 이미지만 불러온다.
+				.where(itemNmLike(itemSearchDto.getSearchQuery()))
+				.orderBy(item.id.desc())
+				.offset(pageable.getOffset())
+				.limit(pageable.getPageSize())
+				.fetchResults();
+
+		List<MainItemDto> content = results.getResults();
+		long total = results.getTotal();
+		return new PageImpl<>(content, pageable, total);
 	}
 }
