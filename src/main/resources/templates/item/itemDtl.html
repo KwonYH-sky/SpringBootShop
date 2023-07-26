@@ -20,7 +20,10 @@
             });
         });
 
-        function calculateTotalPrice() {
+        /**
+         * 현재 주문할 수량과 상품 한 개당 가격을 곱해서 결제 금액을 구해주는 함수
+         */ 
+        function calculateTotalPrice() { 
             let count = $("#count").val();
             let price = $("#price").val();
             let totalPrice = price*count;
@@ -113,6 +116,10 @@
         </div>
     </div>
 
+    <!-- 
+        등록된 상품 이미지를 반복 구문을 통해 보여준다.
+        보통 실제 쇼핑몰에서는 상품에 대한 정보를 예쁘게 이미지로 만들어서 보여준다.
+     -->
     <div th:each="itemImg : ${item.itemImgDtoList}" class="text-center">
         <img th:if="${not #strings.isEmpty(itemImg.imgUrl)}" th:src="${itemImg.imgUrl}" class="round mgb-15" width="880">
     </div>
