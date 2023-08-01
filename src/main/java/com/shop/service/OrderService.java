@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class OrderService {
 			List<OrderItem> orderItems = order.getOrderItems();
 			for (OrderItem orderItem : orderItems) {
 				// 주문한 상품의 대표 이미지를 조회한다.
-				ItemImg itemImg = itemImgRepository.findByIdAndRepimgYn(orderItem.getItem().getId(), "Y");
+				ItemImg itemImg = itemImgRepository.findByItemIdAndRepimgYn(orderItem.getItem().getId(), "Y");
 				OrderItemDto orderItemDto = new OrderItemDto(orderItem, itemImg.getImgUrl());
 				orderHistDto.addOrderItemDto(orderItemDto);
 			}
@@ -69,5 +70,33 @@ public class OrderService {
 		}
 		// 페이지 구현 객체를 생성하여 반환한다.
 		return new PageImpl<OrderHistDto>(orderHistDtos, pageable, totalCount);
+	}
+
+	/**
+	 * 현재 로그인한 사용자와 주문 데이터를 생성한 사용자가 같은지 검사하는 메소드
+	 * @param orderId
+	 * @param email
+	 * @return 같을 시 true, 같지 않을 시 false
+	 */
+	@Transactional(readOnly = true)
+	public boolean validateOrder(Long orderId, String email){
+		Member curMember = memberRepository.findByEmail(email);
+		Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+		Member savedMember = order.getMember();
+
+		if(!StringUtils.equals(curMember.getEmail(), savedMember.getEmail())){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 주문 취소 메소드
+	 * 주문 취소 상태로 변경하면 변경 감지 기능에 의해서 트랜잭션이 끝날 때 update 쿼리가 실행된다.
+	 * @param orderId
+	 */
+	public void cancelOrder (Long orderId) {
+		Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+		order.cancelOrder();
 	}
 }
