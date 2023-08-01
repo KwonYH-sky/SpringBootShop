@@ -67,8 +67,10 @@ public class OrderController {
 	
 	@GetMapping(value = {"/orders", "/orders/{page}"})
 	public String orderHist(@PathVariable("page") Optional<Integer> page, Principal principal, Model model){
+		// 한 번에 가지고 올 주문의 개수는 4개로 설정
 		Pageable pageable = PageRequest.of(page.isPresent() ? page.get() : 0, 4);
 
+		// 현재 로그인한 회원 주문의 주문 개수가 몇 개 인지 조회한다.
 		Page<OrderHistDto> orderHisDtoList = orderService.getOrderList(principal.getName(), pageable);
 		
 		model.addAttribute("orders", orderHisDtoList);

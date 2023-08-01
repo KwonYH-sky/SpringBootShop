@@ -3,7 +3,7 @@
   xmlns:th="http://www.thymealeaf.org"
   xmlns:layout="http://www.ultreq.net.nz/thymeleaf/layout"
   layout:decorate="~{layouts/layout1}">
-  
+
 <head>
    <meta name="_csrf" th:content="${_csrf.token}" />
    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
@@ -48,7 +48,7 @@
     </h2>
 
     <div th:each="order : ${orders.getContent()}">
-
+        <!-- <p th:text="${order.orderStatus.getClass().getName()}"></p> -->
         <div class="d-flex mb-3 align-self-center">
             <h4 th:text="${order.orderDate} + ' 주문'"></h4>
             <div class="ml-3">
@@ -76,8 +76,7 @@
         </div>
     </div>
 
-    <div th:with="start=${(orders.number/maxPage)*maxPage+1}, 
-        end=(${(order.totalPages == 0) ? 1 : (start + (maxPage - 1) < orders.totalPages ? start + (maxPage - 1) : orders.totalPages)})">
+    <div th:with="start=${(orders.number/maxPage)*maxPage + 1}, end=(${(orders.totalPages == 0) ? 1 : (start + (maxPage - 1) < orders.totalPages ? start + (maxPage - 1) : orders.totalPages)})" >
 
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${orders.number eq 0}?'disabled':''">
@@ -87,7 +86,7 @@
             </li>
 
             <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}" th:classappend="${orders.number eq page-1}?'active':''">
-                <a th:href="@{'/orders/' + ${page-1}}" th:inline="text" class="page-link>[[${page}]]</a>
+                <a th:href="@{'/orders/' + ${page-1}}" th:inline="text" class="page-link">[[${page}]]</a>
             </li>
 
             <li class="page-item" th:classappend="${orders.number+1 ge orders.totalPages}?'disabled':''">

@@ -63,7 +63,7 @@ public class OrderServiceTest {
 		Item item = saveItem();
 		Member member = saveMember();
 
-		OrderDto orderDto = new OrderDto(); // 주문할 상품과 상품 수랭을 orderDto 객체에 세팅한다.
+		OrderDto orderDto = new OrderDto(); // 주문할 상품과 상품 수량을 orderDto 객체에 세팅한다.
 		orderDto.setCount(10);
 		orderDto.setItemId(item.getId());
 
