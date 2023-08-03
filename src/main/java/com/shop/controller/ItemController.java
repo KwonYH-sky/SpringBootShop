@@ -53,7 +53,7 @@ public class ItemController {
 			// 매개 변수로 상품 정보와 상품 이미지 정보를 담고 있는 itemImgFileList를 넘겨준다.
 			itemService.saveItem(itemFormDto, itemImgFileList);
 		} catch (Exception e){
-			model.addAttribute("errorMessage", "상품 들록 중 에러가 발생하였습니다.");
+			model.addAttribute("errorMessage", "상품 등록 중 에러가 발생하였습니다.");
 			return "item/itemForm";
 		}
 

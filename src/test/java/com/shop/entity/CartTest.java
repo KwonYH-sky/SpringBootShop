@@ -1,7 +1,7 @@
 package com.shop.entity;
 
 import com.shop.dto.MemberFormDto;
-import com.shop.repository.CartRepositoty;
+import com.shop.repository.CartRepository;
 import com.shop.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CartTest {
 
 	@Autowired
-	CartRepositoty cartRepositoty;
+	CartRepository cartRepository;
 
 	@Autowired
 	MemberRepository memberRepository;
@@ -54,7 +54,7 @@ class CartTest {
 
 		Cart cart = new Cart();
 		cart.setMember(member);
-		cartRepositoty.save(cart);
+		cartRepository.save(cart);
 
 		// JPA는 영소겅 컨텍스트에 데이터를 저장 후 트랜잭션이 끝날 때 flush()를 호출하여 데이터베이스에 반영한다.
 		// 즉, 회원 엔티티와 장바구니 엔티티를 영속성 컨텍스트에 저장 후 엔티티 매니저로부터 강제로 flush()를 호출하여 데이터베이스에 반영한다.
@@ -63,7 +63,7 @@ class CartTest {
 		// 실제 데이터베이스에서 장바구니 엔티티를 가지고 올 때 회원 엔티티도 갗이 가지고 오는지 보기 위해 영속성 컨텍스트를 비운다.
 		em.clear();
 
-		Cart savedCart = cartRepositoty.findById(cart.getId()) // 저장된 장바구니 엔티티를 조회한다.
+		Cart savedCart = cartRepository.findById(cart.getId()) // 저장된 장바구니 엔티티를 조회한다.
 				.orElseThrow(EntityNotFoundException::new);
 		// 처음에 저장한 member 엔티티의 id와 savedCart에 매핑된 member 엔티티의 id를 비교한다.
 		assertEquals(savedCart.getMember().getId(), member.getId());
