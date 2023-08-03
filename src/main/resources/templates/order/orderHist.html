@@ -9,6 +9,54 @@
    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
 
+<!-- 사용자 스크립트 추가 -->
+<th:block layout:fragment="script">
+
+    <script th:inline="javascript">
+        function cancelOrder(orderId) {
+            const token = $("meta[name='_csrf']").attr("content");
+            const header = $("meta[name='_csrf_header']").attr("content");
+
+            const url = "/order/" + orderId + "/cancel";
+            // 취소할 주문 번호를 파라미터로 넘겨준다.
+            const paramData = { 
+                orderId : orderId
+            };
+
+            const param = JSON.stringify(paramData);
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                contentType: "application/json",
+                data: param,
+                beforeSend: function(xhr) {
+                    /* 데이터를 전송하기 전에 헤더에 csrf 값을 설정 */
+                    xhr.setRequestHeader(header, token);
+                },
+                dataType: "json",
+                cache: false,
+                // 주문이 정상적으로 취소됐으면 현재 페이지로 다시 redirect 한다.
+                success: function(result, status){
+                    alert("주문이 취소 되었습니다.");
+                    location.href = '/orders/' + [[${page}]];
+                },
+                error : function (jqXHR, status, error) {
+                    if(jqXHR.status == '401'){
+                        alert('로그인 후 이용해주세요.');
+                        location.href='/member/login';
+                    }else{
+                        alert(jqXHR.responseText);
+                    }
+                }
+            });
+        }
+
+    </script>
+
+</th:block>
+
+
 <th:block layout:fragment="css">
     <style>
         .content-mg{
@@ -53,7 +101,7 @@
             <h4 th:text="${order.orderDate} + ' 주문'"></h4>
             <div class="ml-3">
                 <th:block th:if="${order.orderStatus == T(com.shop.constant.OrderStatus).ORDER}">
-                    <button type="button" class="bth bth-outline-secondary" th:value="order.orderId">주문취소</button>
+                    <button type="button" class="bth bth-outline-secondary" th:value="order.orderId" onclick="cancelOrder(this.value)">주문취소</button>
                 </th:block>
                 <th:block th:unless="${order.orderStatus == T(com.shop.constant.OrderStatus).ORDER}">
                     <h4>(취소 완료)</h4>
