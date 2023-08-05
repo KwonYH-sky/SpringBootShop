@@ -1,5 +1,6 @@
 package com.shop.service;
 
+import com.shop.dto.CartDetailDto;
 import com.shop.dto.CartItemDto;
 import com.shop.entity.Cart;
 import com.shop.entity.CartItem;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +55,24 @@ public class CartService {
 			cartItemRepository.save(cartItem);
 			return cartItem.getId();
 		}
+	}
 
+	@Transactional(readOnly = true)
+	public List<CartDetailDto> getCartList(String email) {
 
+		List<CartDetailDto> cartDetailDtoList = new ArrayList<>();
+
+		Member member = memberRepository.findByEmail(email);
+		// 현재 로그인한 회원의 장바구니 엔티티를 조회한다.
+		Cart cart = cartRepository.findByMemberId(member.getId());
+		if(cart == null) { // 장바구니에 상품을 한 번도 안 담았을 경우 장바구구 엔티티가 없으므로 빈 리스트를 반환한다.
+			return cartDetailDtoList;
+		}
+
+		// 장바구니에 담겨있는 상품 정보를 조회한다.
+		cartDetailDtoList = cartItemRepository.findCartDetailDtoList(cart.getId());
+
+		return cartDetailDtoList;
 	}
 
 }
