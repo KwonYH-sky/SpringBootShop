@@ -13,6 +13,7 @@ import com.shop.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class CartService {
 		Member member = memberRepository.findByEmail(email);
 		// 현재 로그인한 회원의 장바구니 엔티티를 조회한다.
 		Cart cart = cartRepository.findByMemberId(member.getId());
-		if(cart == null) { // 장바구니에 상품을 한 번도 안 담았을 경우 장바구구 엔티티가 없으므로 빈 리스트를 반환한다.
+		if(cart == null) { // 장바구니에 상품을 한 번도 안 담았을 경우 장바구니 엔티티가 없으므로 빈 리스트를 반환한다.
 			return cartDetailDtoList;
 		}
 
@@ -73,6 +74,30 @@ public class CartService {
 		cartDetailDtoList = cartItemRepository.findCartDetailDtoList(cart.getId());
 
 		return cartDetailDtoList;
+	}
+
+	@Transactional(readOnly = true)
+	public boolean validateCartItem(Long cartItemId, String email) {
+		Member curMember = memberRepository.findByEmail(email); // 현재 로그인한 회원을 조회
+		CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(EntityNotFoundException::new);
+		Member savedMember = cartItem.getCart().getMember(); // 장바구니 상품을 저장한 회원을 조회한다.
+
+		// 현재 로그인한 회원과 장바구니 상품을 저장한 회원이 다를 경우 false, 같으면 true를 반환.
+		if (!StringUtils.equals(curMember.getEmail(), savedMember.getEmail())){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 장바구니 상품의 수량을 업데이트하는 메소드
+	 * @param cartItemId
+	 * @param count
+	 */
+	public void updateCartItemCount(Long cartItemId, int count) {
+		CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(EntityNotFoundException::new);
+
+		cartItem.updateCount(count);
 	}
 
 }

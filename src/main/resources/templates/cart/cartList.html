@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymealeaf.org"
+  xmlns:layout="http://www.ultreq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}">
+
+
+  <head>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  </head>
+
+<th:block layout:fragment="script">
+
+  <script th:inline="javascript">
+
+    $(document).ready(() =>{
+        // 주문할 상품을 체크하거나 해제할 경우 총 주문 금액을 구하는 함수를 호출한다.
+        $("input[name=cartChkBox]").change(() =>{
+            getOrderTotalPrice();
+        })
+    });
+
+    /**
+     * 총 주문 금액을 구하는 함수 
+     */
+    function getOrderTotalPrice() {
+        let orderTotalPrice = 0;
+        // 현재 체크된 장바구니 상품들의 가격과 수량을 곱해서 총 주문 금액을 계산한다.
+        $("input[name=cartChkBox]:checked").each(function () {
+            let cartItemId = $(this).val();
+            let price = $("#price_" + cartItemId).attr("data-price");
+            let count = $("#count_" + cartItemId).val();
+            orderTotalPrice += price*count;
+        });
+
+        $("#orderTotalPrice").html(orderTotalPrice + '원');
+    }
+
+    /**
+     * 장바구니에 들어있는 상품의 수량을 변경 시 상품의 가격과 수량을 곱해서 상품 긍액을 변경해준다.
+     * 변경된 총 주문 금액을 계산하기 위해서 마지막에 getOrderTotalPrice() 함수를 호출한다.
+     */ 
+    function changeCount(obj) {
+        let count = obj.value;
+        let cartItemId = obj.id.split('_')[1];
+        let price = $("#price_" + cartItemId).data("price");
+        let totalPrice = count * price;
+        $("#totalPrice_" + cartItemId).html(totalPrice+'원');
+        getOrderTotalPrice();
+    }
+
+    /**
+     * 장바구니에 들어 있는 전체 상품을 체크하거나 체크 해제하는 함수
+     * 변경된 총 주문 금액을 계산하기 위해서 마지막에 getOrderTotalPrice() 함수를 호출한다.
+     */ 
+    function checkAll() {
+        if($("#checkall").prop("checked")) {
+            $("input[name=cartChkBox]").prop("checked", true);
+        } else {
+            $("input[name=cartChkBox]").prop("checked", false);
+        }
+        getOrderTotalPrice();
+    }
+
+  </script>
+
+</th:block>
+
+<!-- 사용자 CSS 추가 -->
+<th:block layout:fragment="css">
+    <style>
+        .content-mg{
+            margin-left:25%;
+            margin-right:25%;
+            margin-top:2%;
+            margin-bottom:100px;
+        }
+        .repImgDiv{
+            margin-right:15px;
+            margin-left:15px;
+            height:auto;
+        }
+        .repImg{
+            height:100px;
+            width:100px;
+        }
+        .fs18{
+            font-size:18px
+        }
+        .fs24{
+            font-size:24px
+        }
+    </style>
+</th:block>
+
+<div layout:fragment="content" class="content-mg">
+
+    <h2 class="md-4">
+        장바구니 목록
+    </h2>
+
+    <div>
+
+        <table class="table">
+            <colgroup>
+                <col width="15%"/>
+                <col width="70%"/>
+                <col width="15%"/>
+            </colgroup>
+            <thead>
+                <tr class="text-center">
+                    <td>
+                        <input type="checkbox" id="checkall" onclick="checkAll()">전체선택
+                    </td>
+                    <td>상품정보</td>
+                    <td>상품금액</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="cartItem : ${cartItems}">
+                    <td class="text-center align-middle">
+                        <input type="checkbox" name="cartChkBox" th:value="${cartItem.cartItemId}">
+                    </td>
+                    <td class="d-flex">
+                        <div class="repImgDiv align-self-center">
+                            <img th:src="${cartItem.imgUrl}" class="rounded repImg" th:alt="${cartItem.itemNm}">
+                        </div>
+                        <div class="align-self-center">
+                            <span th:text="${cartItem.itemNm}" class="fs24 font-weight-bold"></span>
+                            <div class="fs18 font-weight-light">
+                                <span class="input-group mt-2">
+                                    <span th:id="'price_' + ${cartItem.cartItemId}" 
+                                          th:data-price="${cartItem.price}" 
+                                          th:text="${cartItem.price} + '원'"
+                                          class="align-self-center mr-2"></span>
+                                    <input type="number" name="count" th:id="'count_' + ${cartItem.cartItemId}"
+                                           th:value="${cartItem.count}" min="1"
+                                           onclick="changeCount(this)"
+                                           class="form-control mr-2">
+                                    <button type="button" class="close" aria-label="Close">
+                                        <span aria-hidden="true" th:data-id="${cartItem.cartItemId}">&times;</span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center align-middle">
+                        <span th:id="'totalPrice_' + ${cartItem.cartItemId}" name="totalPrice"
+                              th:text="${cartItem.price * cartItem.count} + '원'"></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 class="text-center">
+            총 주문 금액 : <span id="orderTotalPrice" class="text-danger">0원</span>
+        </h2>
+
+        <div class="text-center mt-3">
+            <button type="button" class="bth bth-primary bth-lg">주문하기</button>
+        </div>
+
+    </div>
+
+</div>
+
+</html>
