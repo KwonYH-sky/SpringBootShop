@@ -26,7 +26,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 			"where ci.cart.id = :cartId " +
 			"and im.item.id = ci.item.id " +
 			"and im.repimgYn = 'Y' " + // 장바구니에 담겨있는 상품의 대표 이미지만 가지고 오도록 조건문을 작성한다.
-			"order by ci.regpimgYn desc")
+			"order by ci.regTime desc")
 	List<CartDetailDto> findCartDetailDtoList(Long cartId);
 
 }
